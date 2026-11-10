@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>⚙️ Base de mots — TOP 5</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#070711;--s1:#0f0f1e;--s2:#17172c;--border:#2b2b48;
+      --p:#8b5cf6;--p2:#a78bfa;--pink:#ec4899;--gold:#f59e0b;--gold2:#fbbf24;
+      --green:#10b981;--red:#ef4444;--muted:#64748b;--text:#f8fafc;--r:16px;
+    }
+    html,body{min-height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
+    body::before{
+      content:'';position:fixed;inset:0;
+      background:radial-gradient(ellipse 60% 50% at 20% 10%,rgba(139,92,246,.15) 0%,transparent 55%);
+      pointer-events:none;z-index:0;
+    }
+    #app{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:32px 20px 60px}
+
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:20px;transition:color .2s}
+    .back:hover{color:var(--p2)}
+
+    h1{
+      font-size:2rem;font-weight:900;
+      background:linear-gradient(130deg,var(--gold2),var(--p2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;
+    }
+    .sub{color:var(--muted);font-size:.92rem;margin-bottom:28px}
+
+    .card{
+      background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
+      padding:24px 28px;margin-bottom:20px;box-shadow:0 10px 30px rgba(0,0,0,.3);
+    }
+    .card h2{font-size:1.1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+    input[type=text],textarea{
+      width:100%;padding:13px 16px;background:var(--s1);border:1.5px solid var(--border);
+      border-radius:12px;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s;font-family:inherit;
+    }
+    input[type=text]:focus,textarea:focus{border-color:var(--p)}
+    input[type=text]::placeholder,textarea::placeholder{color:var(--muted)}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 22px;
+      border-radius:12px;border:none;font-size:.95rem;font-weight:800;cursor:pointer;
+      transition:all .18s;font-family:inherit;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn-green{background:linear-gradient(135deg,var(--green),#059669);color:#fff}
+    .btn-green:hover{box-shadow:0 4px 18px rgba(16,185,129,.4)}
+    .btn-purple{background:linear-gradient(135deg,var(--p),#7c3aed);color:#fff}
+    .btn-purple:hover{box-shadow:0 4px 18px rgba(139,92,246,.4)}
+
+    .row{display:flex;gap:10px}
+    .row input{flex:1}
+
+    .badge{background:var(--s1);border:1px solid var(--border);border-radius:100px;padding:4px 12px;font-size:.85rem;color:var(--p2);font-weight:800}
+
+    /* Grille des mots */
+    .word-grid{display:flex;flex-wrap:wrap;gap:8px;max-height:420px;overflow-y:auto;padding-right:6px}
+    .word-pill{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:100px;
+      background:var(--s1);border:1px solid var(--border);font-size:.9rem;font-weight:700;
+      transition:border-color .2s;
+    }
+    .word-pill:hover{border-color:var(--red)}
+    .word-pill button{
+      background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;line-height:1;
+      padding:0 2px;transition:color .15s;
+    }
+    .word-pill button:hover{color:var(--red)}
+
+    #toast{
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+      background:var(--s2);border:1px solid var(--border);border-radius:100px;
+      padding:12px 26px;font-weight:700;font-size:.92rem;z-index:999;
+      transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;
+    }
+    #toast.show{transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div id="app">
+  <a href="/" class="back">← Retour au jeu</a>
+  <h1>⚙️ Base de mots du TOP 5</h1>
+  <p class="sub">Ajoute ou retire des mots aléatoires pour enrichir les parties.</p>
+
+  <!-- Ajouter un mot -->
+  <div class="card">
+    <h2>➕ Ajouter un mot</h2>
+    <div class="row">
+      <input type="text" id="single-input" placeholder="Ex: Grille-pain" maxlength="30"/>
+      <button class="btn btn-green" id="single-btn">Ajouter</button>
+    </div>
+  </div>
+
+  <!-- Ajouter en masse -->
+  <div class="card">
+    <h2>📋 Ajouter en masse (copier-coller)</h2>
+    <p style="color:var(--muted);font-size:.84rem;margin-bottom:12px">Tape ou colle un mot par ligne. Les doublons sont automatiquement éliminés.</p>
+    <textarea id="bulk-input" rows="5" placeholder="Glace&#10;Trottinette&#10;Submersible&#10;Extincteur"></textarea>
+    <div style="margin-top:12px">
+      <button class="btn btn-green" id="bulk-btn">Ajouter la liste</button>
+    </div>
+  </div>
+
+  <!-- Liste des mots -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2>📝 Mots enregistrés <span class="badge" id="total-badge">0</span></h2>
+      <input type="text" id="search-input" placeholder="🔍 Filtrer…" style="max-width:180px;padding:8px 12px;font-size:.9rem"/>
+    </div>
+    <div class="word-grid" id="word-grid"></div>
+  </div>
+</div>
+
+<script>
+let allWords = [];
+let filterTerm = '';
+
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+async function loadWords(){
+  try {
+    const res = await fetch('/api/words');
+    const data = await res.json();
+    allWords = data.words || [];
+    renderWords();
+  } catch(e) {
+    toast('❌ Erreur de chargement');
+  }
+}
+
+function renderWords(){
+  const filtered = filterTerm
+    ? allWords.filter(w => w.toLowerCase().includes(filterTerm))
+    : allWords;
+
+  document.getElementById('total-badge').textContent = allWords.length + ' mots';
+  document.getElementById('word-grid').innerHTML = filtered.map(w => `
+    <div class="word-pill">
+      <span>${w}</span>
+      <button onclick="deleteWord('${w.replace(/'/g,"\\'")}')" title="Supprimer ce mot">✕</button>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:.9rem">Aucun mot trouvé.</div>';
+}
+
+document.getElementById('search-input').oninput = (e) => {
+  filterTerm = e.target.value.trim().toLowerCase();
+  renderWords();
+};
+
+// Ajouter un mot
+async function addSingle(){
+  const input = document.getElementById('single-input');
+  const word = input.value.trim();
+  if (!word) return;
+
+  const res = await fetch('/api/words', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ word })
+  });
+  const data = await res.json();
+  if (data.added > 0) {
+    toast(`✅ "${word}" ajouté !`);
+    input.value = '';
+    loadWords();
+  } else {
+    toast(`⚠️ Ce mot est déjà présent`);
+  }
+}
+
+document.getElementById('single-btn').onclick = addSingle;
+document.getElementById('single-input').onkeydown = (e) => { if (e.key === 'Enter') addSingle(); };
+
+// Ajouter en masse
+document.getElementById('bulk-btn').onclick = async () => {
+  const textarea = document.getElementById('bulk-input');
+  const lines = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return;
+
+  const res = await fetch('/api/words', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ words: lines })
+  });
+  const data = await res.json();
+  toast(`✅ ${data.added} nouveau(x) mot(s) ajouté(s) !`);
+  textarea.value = '';
+  loadWords();
+};
+
+// Supprimer un mot
+window.deleteWord = async (word) => {
+  const res = await fetch('/api/words/' + encodeURIComponent(word), { method: 'DELETE' });
+  if (res.ok) {
+    toast(`🗑️ "${word}" supprimé`);
+    allWords = allWords.filter(w => w !== word);
+    renderWords();
+  }
+};
+
+loadWords();
+</script>
+</body>
+</html>
