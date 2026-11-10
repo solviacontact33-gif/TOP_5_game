@@ -1,0 +1,13 @@
+{
+  "name": "top5-game",
+  "version": "1.0.0",
+  "description": "Jeu de classement Top 5 multijoueur en temps réel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
